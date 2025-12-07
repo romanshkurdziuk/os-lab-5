@@ -7,22 +7,27 @@ int main()
 {
     HANDLE hPipe;
     
-    while (true) {
+    while (true) 
+    {
         hPipe = CreateFileA(PIPE_NAME, GENERIC_READ | GENERIC_WRITE, 0, NULL, OPEN_EXISTING, 0, NULL);
         if (hPipe != INVALID_HANDLE_VALUE) break;
-        if (GetLastError() != ERROR_PIPE_BUSY) {
+        if (GetLastError() != ERROR_PIPE_BUSY) 
+        {
             std::cerr << "Server not found.\n"; Sleep(1000);
-        } else {
+        } else 
+        {
             WaitNamedPipeA(PIPE_NAME, 2000);
         }
     }
     std::cout << "Connected.\n";
 
-    while (true) {
+    while (true) 
+    {
         std::cout << "\n1. Modify\n2. Read\n3. Exit\n> ";
         int choice; std::cin >> choice;
 
-        if (choice == 3) {
+        if (choice == 3) 
+        {
             Request req = { EXIT_CMD, 0 };
             PipeComm::Send(hPipe, &req, sizeof(req));
             break;
@@ -37,19 +42,22 @@ int main()
         employee emp;
         if (!PipeComm::Receive(hPipe, &emp, sizeof(emp))) break;
 
-        if (emp.num == -1) {
+        if (emp.num == -1) 
+        {
             std::cout << "Not found.\n"; continue;
         }
 
         std::cout << "Employee: " << emp.name << ", Hours: " << emp.hours << "\n";
 
-        if (choice == 2) { // Read
+        if (choice == 2) 
+        {
             std::cout << "Press Enter to release...";
             std::cin.ignore(); std::cin.get();
             char ack = 1;
             PipeComm::Send(hPipe, &ack, 1);
         } 
-        else if (choice == 1) { // Modify
+        else if (choice == 1) 
+        {
             std::cout << "New Name: "; std::cin >> emp.name;
             std::cout << "New Hours: "; std::cin >> emp.hours;
             PipeComm::Send(hPipe, &emp, sizeof(emp));

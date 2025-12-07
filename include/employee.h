@@ -1,6 +1,7 @@
 #pragma once
 
-struct employee {
+struct employee 
+{
     int num;        // ID
     char name[10];  // Имя
     double hours;   // Часы
@@ -8,7 +9,8 @@ struct employee {
 
 const char* const PIPE_NAME = "\\\\.\\pipe\\TubeLab5Refactored";
 
-enum Command {
+enum Command 
+{
     READ_CMD,
     MODIFY_CMD,
     EXIT_CMD

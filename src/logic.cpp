@@ -6,10 +6,12 @@
 EmployeeManager::EmployeeManager(const std::string& fname) : filename(fname) {}
 EmployeeManager::~EmployeeManager() {}
 
-void EmployeeManager::InitializeFromConsole(int count) {    
+void EmployeeManager::InitializeFromConsole(int count) 
+{    
     employees.resize(count);
     locks.resize(count);
-    for (int i = 0; i < count; ++i) {
+    for (int i = 0; i < count; ++i) 
+    {
         employees[i].num = i + 1;
         std::cout << "Employee " << (i + 1) << " -> Name: ";
         std::cin >> employees[i].name;
@@ -20,23 +22,26 @@ void EmployeeManager::InitializeFromConsole(int count) {
     SaveToFile();
 }
 
-// Новая логика для тестов
-void EmployeeManager::InitializeWithData(const std::vector<employee>& data) {
+void EmployeeManager::InitializeWithData(const std::vector<employee>& data) 
+{
     employees = data;
     locks.resize(employees.size());
-    for (size_t i = 0; i < locks.size(); ++i) {
+    for (size_t i = 0; i < locks.size(); ++i) 
+    {
         InitializeSRWLock(&locks[i]);
     }
     SaveToFile();
 }
 
-void EmployeeManager::SaveToFile() {
+void EmployeeManager::SaveToFile() 
+{
     std::ofstream outFile(filename, std::ios::binary);
     outFile.write(reinterpret_cast<char*>(employees.data()), employees.size() * sizeof(employee));
     outFile.close();
 }
 
-void EmployeeManager::PrintAll() {
+void EmployeeManager::PrintAll() 
+{
     std::cout << "\n--- File Content ---\n";
     for (const auto& e : employees) {
         std::cout << "ID: " << e.num << ", Name: " << e.name << ", Hours: " << e.hours << "\n";
@@ -44,80 +49,82 @@ void EmployeeManager::PrintAll() {
     std::cout << "--------------------\n";
 }
 
-int EmployeeManager::FindEmployeeIndex(int id) {
-    for (size_t i = 0; i < employees.size(); ++i) {
+int EmployeeManager::FindEmployeeIndex(int id) 
+{
+    for (size_t i = 0; i < employees.size(); ++i) 
+    {
         if (employees[i].num == id) return (int)i;
     }
     return -1;
 }
 
-employee EmployeeManager::StartRead(int index) {
+employee EmployeeManager::StartRead(int index) 
+{
     AcquireSRWLockShared(&locks[index]);
     return employees[index];
 }
 
-void EmployeeManager::EndRead(int index) {
+void EmployeeManager::EndRead(int index) 
+{
     ReleaseSRWLockShared(&locks[index]);
 }
 
-employee EmployeeManager::StartModify(int index) {
+employee EmployeeManager::StartModify(int index) 
+{
     AcquireSRWLockExclusive(&locks[index]);
     return employees[index];
 }
 
-void EmployeeManager::ApplyModify(int index, const employee& newData) {
-    // Обновляем только изменяемые поля, ID оставляем старый (для надежности)
+void EmployeeManager::ApplyModify(int index, const employee& newData) 
+{
     employees[index] = newData; 
     ReleaseSRWLockExclusive(&locks[index]);
     std::cout << "[Manager] Employee " << employees[index].num << " updated.\n";
 }
 
-// --- Логика потока клиента ---
-
-DWORD WINAPI ClientHandlerThread(LPVOID param) {
+DWORD WINAPI ClientHandlerThread(LPVOID param) 
+{
     ThreadArgs* args = (ThreadArgs*)param;
     HANDLE hPipe = args->hPipe;
     EmployeeManager* mgr = args->manager;
-    delete args; // Удаляем структуру аргументов
+    delete args;
 
     Request req;
-    while (PipeComm::Receive(hPipe, &req, sizeof(req))) {
+    while (PipeComm::Receive(hPipe, &req, sizeof(req))) 
+    {
         if (req.cmd == EXIT_CMD) break;
 
         int idx = mgr->FindEmployeeIndex(req.id);
 
-        if (idx == -1) {
-            // Сотрудник не найден
+        if (idx == -1) 
+        {
             employee err; err.num = -1;
             PipeComm::Send(hPipe, &err, sizeof(err));
             continue;
         }
 
-        if (req.cmd == READ_CMD) {
-            // 1. Блокируем и отправляем
+        if (req.cmd == READ_CMD) 
+        {
             employee data = mgr->StartRead(idx);
             PipeComm::Send(hPipe, &data, sizeof(data));
 
-            // 2. Ждем сигнала об окончании чтения
             char buffer;
             PipeComm::Receive(hPipe, &buffer, 1);
 
-            // 3. Разблокируем
             mgr->EndRead(idx);
         }
-        else if (req.cmd == MODIFY_CMD) {
-            // 1. Блокируем (эксклюзивно) и отправляем текущие данные
+        else if (req.cmd == MODIFY_CMD) 
+        {
             employee data = mgr->StartModify(idx);
             PipeComm::Send(hPipe, &data, sizeof(data));
 
-            // 2. Ждем новые данные
             employee newData;
-            if (PipeComm::Receive(hPipe, &newData, sizeof(newData))) {
+            if (PipeComm::Receive(hPipe, &newData, sizeof(newData))) 
+            {
                 mgr->ApplyModify(idx, newData);
-            } else {
-                // Если сбой связи, всё равно надо разблокировать!
-                mgr->EndRead(idx); // Или ReleaseExclusive, тут надо аккуратно
-                // В данном простом примере ApplyModify делает Release
+            } else 
+            {
+                mgr->EndRead(idx);
             }
         }
     }
