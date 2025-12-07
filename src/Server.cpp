@@ -13,8 +13,8 @@ int main() {
     std::cout << "Enter employee count: "; std::cin >> empCount;
 
     // Инициализация менеджера (внутри будет ввод данных)
-    EmployeeManager manager(filename, empCount);
-    manager.PrintAll();
+    EmployeeManager manager(filename); // Просто создаем
+    manager.InitializeFromConsole(empCount); // Заполняем с консоли
 
     std::cout << "Enter client count: "; std::cin >> clientCount;
     

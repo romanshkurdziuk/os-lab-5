@@ -3,11 +3,12 @@
 #include <iostream>
 #include <fstream>
 
-EmployeeManager::EmployeeManager(const std::string& fname, int count) : filename(fname) {
+EmployeeManager::EmployeeManager(const std::string& fname) : filename(fname) {}
+EmployeeManager::~EmployeeManager() {}
+
+void EmployeeManager::InitializeFromConsole(int count) {    
     employees.resize(count);
     locks.resize(count);
-
-    // Ввод данных
     for (int i = 0; i < count; ++i) {
         employees[i].num = i + 1;
         std::cout << "Employee " << (i + 1) << " -> Name: ";
@@ -19,8 +20,14 @@ EmployeeManager::EmployeeManager(const std::string& fname, int count) : filename
     SaveToFile();
 }
 
-EmployeeManager::~EmployeeManager() {
-    // SRWLock не требуют явного удаления, но вектор очистится сам
+// Новая логика для тестов
+void EmployeeManager::InitializeWithData(const std::vector<employee>& data) {
+    employees = data;
+    locks.resize(employees.size());
+    for (size_t i = 0; i < locks.size(); ++i) {
+        InitializeSRWLock(&locks[i]);
+    }
+    SaveToFile();
 }
 
 void EmployeeManager::SaveToFile() {

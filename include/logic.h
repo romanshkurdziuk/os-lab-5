@@ -12,8 +12,14 @@ private:
     std::string filename;
 
 public:
-    EmployeeManager(const std::string& fname, int count);
+    EmployeeManager(const std::string& fname);
     ~EmployeeManager();
+
+    // 2. Метод для заполнения данными (для Server.cpp)
+    void InitializeFromConsole(int count);
+
+    // 3. Метод для заполнения данными (для Тестов)
+    void InitializeWithData(const std::vector<employee>& data);
 
     // Загрузка/Сохранение
     void SaveToFile();
