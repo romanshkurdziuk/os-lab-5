@@ -3,9 +3,11 @@ project(Lab5_Pipes)
 
 set(CMAKE_CXX_STANDARD 17)
 
-# Указываем папку с заголовками
+# Подключаем папку include
 include_directories(include)
 
-# Описываем цели сборки
+# Собираем Сервер
 add_executable(Server src/Server.cpp)
+
+# Собираем Клиент
 add_executable(Client src/Client.cpp)

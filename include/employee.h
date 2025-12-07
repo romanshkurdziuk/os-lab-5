@@ -6,18 +6,18 @@ struct employee {
     double hours;   // Часы
 };
 
-// Имя канала
-const char* const PIPE_NAME = "\\\\.\\pipe\\Lab5Pipe";
+// Имя именованного канала
+const char* const PIPE_NAME = "\\\\.\\pipe\\TubeLab5";
 
-// Типы команд
+// Команды
 enum Command {
-    READ_CMD,   // Хочу прочитать
-    MODIFY_CMD, // Хочу изменить
-    EXIT_CMD    // Я ухожу
+    READ_CMD,   // Чтение
+    MODIFY_CMD, // Изменение
+    EXIT_CMD    // Выход
 };
 
-// То, что Клиент отправляет Серверу при первом обращении
+// Запрос от клиента к серверу
 struct Request {
     Command cmd;
-    int id; // ID сотрудника, с которым хотим работать
+    int id; // ID записи
 };
